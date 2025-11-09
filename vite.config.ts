@@ -1,20 +1,12 @@
 import { defineConfig } from 'vite'
 
-function normalizeBasePath(input?: string | null): string {
-  if (!input) return ''
-  return input.trim().replace(/^\/+|\/+$/g, '')
-}
-
-export default defineConfig(({ command }) => {
-  const envBase = normalizeBasePath(process.env.VITE_BASE_PATH ?? process.env.BASE_PATH ?? null)
-  const repoBase = normalizeBasePath(process.env.GITHUB_REPOSITORY?.split('/')?.[1] ?? null)
-  const resolvedBase = envBase || repoBase
-
-  return {
-    base: command === 'serve'
-      ? '/'
-      : resolvedBase
-        ? `/${resolvedBase}/`
-        : './',
-  }
-})
+export default defineConfig(({ command }) => ({
+  /**
+   * GitHub Pages serves the compiled site from a nested path based on the
+   * repository name. Using a relative base ("./") keeps the generated asset
+   * URLs portable across any hosting setup without requiring environment
+   * variables or workflow configuration. During local development we still use
+   * the root path so Vite's dev server behaves normally.
+   */
+  base: command === 'serve' ? '/' : './',
+}))
