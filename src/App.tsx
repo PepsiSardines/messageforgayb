@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail } from "lucide-react";
 import confetti from "canvas-confetti";
@@ -13,6 +13,33 @@ import confetti from "canvas-confetti";
 
 const DESTINATION_RAW = "12721 S Dixie Hwy, Pinecrest, FL 33156, United States";
 const DEST_Q = encodeURIComponent(DESTINATION_RAW);
+
+function getTenPmInfo(now = new Date()) {
+  const startOfDay = new Date(now);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const tenPm = new Date(now);
+  tenPm.setHours(22, 0, 0, 0);
+
+  const totalMs = tenPm.getTime() - startOfDay.getTime();
+  const elapsedMs = now.getTime() - startOfDay.getTime();
+  const progress = totalMs <= 0 ? 1 : Math.min(1, Math.max(0, elapsedMs / totalMs));
+
+  const remainingMs = tenPm.getTime() - now.getTime();
+  if (remainingMs <= 0) {
+    return { progress, remainingLabel: "It's 10PM!" };
+  }
+
+  const totalMinutes = Math.floor(remainingMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  const parts = [];
+  if (hours > 0) parts.push(`${hours}h`);
+  if (minutes > 0 || hours === 0) parts.push(`${minutes}m`);
+
+  return { progress, remainingLabel: `${parts.join(" ")} remaining` };
+}
 
 function openNavigation() {
   if (typeof window === "undefined") return; // SSR safety
@@ -66,6 +93,15 @@ function burstConfetti() {
 
 export default function App() {
   const [revealed, setRevealed] = useState(false);
+  const [tenPmInfo, setTenPmInfo] = useState(() => getTenPmInfo());
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () => setTenPmInfo(getTenPmInfo());
+    update();
+    const id = window.setInterval(update, 1000 * 30);
+    return () => window.clearInterval(id);
+  }, []);
 
   const blobs = useMemo(
     () => [
@@ -188,6 +224,20 @@ export default function App() {
                 To let you know that my cousins and I will be going tonight at <span className="font-semibold text-white">10PM</span>.<br />
                 See you there.
               </p>
+
+              <div className="mt-5">
+                <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-400">
+                  <span>Countdown to 10PM</span>
+                  <span className="font-semibold text-slate-200">{Math.round(tenPmInfo.progress * 100)}%</span>
+                </div>
+                <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-sky-400 to-indigo-500 transition-[width] duration-500 ease-out"
+                    style={{ width: `${Math.round(tenPmInfo.progress * 100)}%` }}
+                  />
+                </div>
+                <div className="mt-2 text-xs text-slate-400">{tenPmInfo.remainingLabel}</div>
+              </div>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <button
