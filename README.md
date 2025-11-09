@@ -33,7 +33,7 @@ npm run preview
    ```
 
 ### Troubleshooting
-- If the page shows a blank screen or 404 on refresh, ensure the workflow logs include a `GITHUB_REPOSITORY` value. You can also export `VITE_BASE_PATH` (or `BASE_PATH`) during the build to force a specific base path.
+- If the page shows a blank screen or 404 on refresh, open the deployed page’s **View Source** and confirm asset URLs start with `./assets/`. If they begin with `/assets/`, rebuild with `VITE_BASE_PATH="<repo-name>" npm run build` so the correct base path is embedded.
 - If Tailwind styles don’t load, ensure `src/index.css` is imported in `src/main.tsx` and that the `content` globs in `tailwind.config.js` include your `src/**/*.tsx` files.
 - If GitHub Actions reports that the lockfile is missing, run `npm install` locally once to generate a real `package-lock.json` and commit it. The workflow uses `npm install --no-audit --no-fund`, so a generated lockfile will be respected but isn't strictly required for successful builds.
 - If the **Navigate** button doesn’t open the native maps app on mobile, your device/browser may block the scheme. It will always fall back to Google Maps in a new tab on desktop.
