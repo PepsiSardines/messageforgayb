@@ -16,7 +16,7 @@ npm run preview
 
 ## Deploy to GitHub Pages
 1. **Create a GitHub repo** (any name works) and copy the repo name.
-2. The Vite config automatically detects the repo name from the `GITHUB_REPOSITORY` environment variable during CI builds, so no manual edits are required for GitHub Pages. If you need to force a custom base path, export `VITE_BASE_PATH="<your-repo-name>"` before running `npm run build`.
+2. The Vite config automatically detects the repo name from the `GITHUB_REPOSITORY` environment variable during CI builds, and the workflow now exports `VITE_BASE_PATH` to that repo name for you. If you need to force a custom base path locally or in another CI system, export `VITE_BASE_PATH="<your-repo-name>"` before running `npm run build`.
 3. Commit & push all files to the **main** branch:
    ```bash
    git init
@@ -33,7 +33,7 @@ npm run preview
    ```
 
 ### Troubleshooting
-- If the page shows a blank screen or 404 on refresh, open the deployed page’s **View Source** and confirm asset URLs start with `./assets/`. If they begin with `/assets/`, rebuild with `VITE_BASE_PATH="<repo-name>" npm run build` so the correct base path is embedded.
+- If the page shows a blank screen or 404 on refresh, open the deployed page’s **View Source** and confirm asset URLs start with `./assets/` (or `/<repo-name>/assets/`). The GitHub Actions workflow automatically sets this to your repository name, but if you are building elsewhere rebuild with `VITE_BASE_PATH="<repo-name>" npm run build` so the correct base path is embedded.
 - If Tailwind styles don’t load, ensure `src/index.css` is imported in `src/main.tsx` and that the `content` globs in `tailwind.config.js` include your `src/**/*.tsx` files.
 - If GitHub Actions reports that the lockfile is missing, run `npm install` locally once to generate a real `package-lock.json` and commit it. The workflow uses `npm install --no-audit --no-fund`, so a generated lockfile will be respected but isn't strictly required for successful builds.
 - If the **Navigate** button doesn’t open the native maps app on mobile, your device/browser may block the scheme. It will always fall back to Google Maps in a new tab on desktop.
